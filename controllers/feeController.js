@@ -13,8 +13,12 @@ exports.createFeeStructure = async (req, res) => {
   try {
     const { classId, academicYear } = req.body;
 
-    // Check if fee structure already exists for this class and year
-    const existing = await FeeStructure.findOne({ classId, academicYear });
+    // Check existing structure
+    const existing = await FeeStructure.findOne({
+      classId,
+      academicYear
+    });
+
     if (existing) {
       return res.status(400).json({
         success: false,
@@ -22,8 +26,22 @@ exports.createFeeStructure = async (req, res) => {
       });
     }
 
+    // Calculate total fee
+    const totalFee =
+      Number(req.body.tuitionFee || 0) +
+      Number(req.body.admissionFee || 0) +
+      Number(req.body.examFee || 0) +
+      Number(req.body.libraryFee || 0) +
+      Number(req.body.sportsFee || 0) +
+      Number(req.body.labFee || 0) +
+      Number(req.body.transportFee || 0) +
+      Number(req.body.hostelFee || 0) +
+      Number(req.body.miscellaneousFee || 0);
+
+    // Create structure
     const feeStructure = await FeeStructure.create({
       ...req.body,
+      totalFee,
       createdBy: req.user?._id || null
     });
 
@@ -34,9 +52,9 @@ exports.createFeeStructure = async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
-      error: err.message 
+    res.status(500).json({
+      success: false,
+      error: err.message
     });
   }
 };
@@ -73,13 +91,30 @@ exports.getFeeStructures = async (req, res) => {
 // Update fee structure
 exports.updateFeeStructure = async (req, res) => {
   try {
+
+    // Recalculate total fee
+    const totalFee =
+      Number(req.body.tuitionFee || 0) +
+      Number(req.body.admissionFee || 0) +
+      Number(req.body.examFee || 0) +
+      Number(req.body.libraryFee || 0) +
+      Number(req.body.sportsFee || 0) +
+      Number(req.body.labFee || 0) +
+      Number(req.body.transportFee || 0) +
+      Number(req.body.hostelFee || 0) +
+      Number(req.body.miscellaneousFee || 0);
+
     const feeStructure = await FeeStructure.findByIdAndUpdate(
       req.params.id,
       {
         ...req.body,
+        totalFee,
         updatedBy: req.user?._id || null
       },
-      { new: true, runValidators: true }
+      {
+        new: true,
+        runValidators: true
+      }
     );
 
     if (!feeStructure) {
@@ -96,9 +131,9 @@ exports.updateFeeStructure = async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
-      error: err.message 
+    res.status(500).json({
+      success: false,
+      error: err.message
     });
   }
 };
@@ -262,7 +297,7 @@ exports.getStudentFee = async (req, res) => {
 
 // ==================== FEE PAYMENT MANAGEMENT ====================
 
-// Record a payment
+
 // Record a payment
 exports.recordPayment = async (req, res) => {
   try {

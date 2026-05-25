@@ -127,25 +127,4 @@ const feeStructureSchema = new mongoose.Schema({
 // ✅ COMPOUND INDEX - class + academic year unique
 feeStructureSchema.index({ classId: 1, academicYear: 1 }, { unique: true });
 
-// ✅ FIXED PRE-SAVE MIDDLEWARE
-// feeStructureSchema.pre('save', function(next) {
-//   try {
-//     // Calculate total fee
-//     this.totalFee = 
-//       (this.tuitionFee || 0) +
-//       (this.admissionFee || 0) +
-//       (this.examFee || 0) +
-//       (this.libraryFee || 0) +
-//       (this.sportsFee || 0) +
-//       (this.labFee || 0) +
-//       (this.transportFee || 0) +
-//       (this.hostelFee || 0) +
-//       (this.miscellaneousFee || 0);
-    
-//     next();
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
 module.exports = mongoose.model("FeeStructure", feeStructureSchema);
